@@ -2,7 +2,8 @@ pipeline {
     agent any
 
     triggers {
-        githubPullRequest()
+        // Correct trigger type for GitHub Pull Requests
+        githubPullRequests()
     }
 
     environment {
