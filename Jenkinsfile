@@ -35,15 +35,6 @@ pipeline {
             }
         }
 
-        stage('Test Docker Container (Optional)') {
-            steps {
-                script {
-                    // Optionally, you can run tests on the container here
-                    // sh 'docker exec react-app npm test'
-                }
-            }
-        }
-
         stage('Clean up') {
             steps {
                 script {
