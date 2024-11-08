@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     triggers {
-        githubPullRequests {
-            orgWhitelist('your-github-org') // Optional: Add your GitHub organization or repository name
-        }
+        githubPullRequest()
     }
 
     environment {
