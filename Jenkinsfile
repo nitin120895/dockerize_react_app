@@ -10,7 +10,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/your-username/your-repo.git'
+                // Checkout the code from the PR branch or master
+                checkout scm
             }
         }
         stage('Build with Docker Compose') {
