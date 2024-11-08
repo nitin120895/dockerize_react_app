@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React with nitin
+          Learn React with nitin test
         </a>
       </header>
     </div>
