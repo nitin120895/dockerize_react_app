@@ -1,11 +1,5 @@
 pipeline {
     agent any
-
-    triggers {
-        // Correct trigger type for GitHub Pull Requests
-        githubPullRequests()
-    }
-
     environment {
         DOCKER_IMAGE_NAME = "my-react-app" // Local Docker image name
         DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_ID}"
@@ -17,16 +11,6 @@ pipeline {
             steps {
                 // Checkout the code from the PR branch or master
                 checkout scm
-            }
-        }
-
-        stage('Build React App') {
-            steps {
-                script {
-                    // Install dependencies and build the React app
-                    sh 'npm install'
-                    sh 'npm run build'
-                }
             }
         }
 
