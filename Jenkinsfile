@@ -18,7 +18,12 @@ pipeline {
             steps {
                 script {
                     echo "Building Docker image..."
-                    sh 'docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG .'
+                    try {
+                        sh 'docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG . || exit 1'
+                    } catch (Exception e) {
+                        echo "Docker build failed: ${e.message}"
+                        throw e
+                    }
                     echo "Docker image built: $DOCKER_IMAGE_NAME:$DOCKER_TAG"
                 }
             }
@@ -27,11 +32,23 @@ pipeline {
         stage('Run Docker Container Locally') {
             steps {
                 script {
+                    echo "Creating Docker network..."
+                    try {
+                        sh 'docker network create $DOCKER_NETWORK || true'
+                    } catch (Exception e) {
+                        echo "Docker network creation failed: ${e.message}"
+                    }
+
                     echo "Running Docker container..."
-                    sh '''
-                    docker network create $DOCKER_NETWORK || true
-                    docker run -d --name react-app -p 8080:80 --network $DOCKER_NETWORK $DOCKER_IMAGE_NAME:$DOCKER_TAG
-                    '''
+                    try {
+                        sh '''
+                        docker run -d --name react-app -p 8080:80 --network $DOCKER_NETWORK $DOCKER_IMAGE_NAME:$DOCKER_TAG
+                        '''
+                    } catch (Exception e) {
+                        echo "Docker run failed: ${e.message}"
+                        throw e
+                    }
+
                     echo "Docker container is running."
                 }
             }
@@ -41,10 +58,14 @@ pipeline {
             steps {
                 script {
                     echo "Cleaning up Docker container..."
-                    sh 'docker stop react-app || true'
-                    sh 'docker rm react-app || true'
-                    sh 'docker rmi $DOCKER_IMAGE_NAME:$DOCKER_TAG || true'
-                    sh 'docker network rm $DOCKER_NETWORK || true'
+                    try {
+                        sh 'docker stop react-app || true'
+                        sh 'docker rm react-app || true'
+                        sh 'docker rmi $DOCKER_IMAGE_NAME:$DOCKER_TAG || true'
+                        sh 'docker network rm $DOCKER_NETWORK || true'
+                    } catch (Exception e) {
+                        echo "Error during cleanup: ${e.message}"
+                    }
                 }
             }
         }
@@ -53,7 +74,11 @@ pipeline {
     post {
         always {
             echo "Cleaning up Docker resources..."
-            sh 'docker system prune -f || true'
+            try {
+                sh 'docker system prune -f || true'
+            } catch (Exception e) {
+                echo "Docker system prune failed: ${e.message}"
+            }
         }
     }
 }
