@@ -1,57 +1,83 @@
 pipeline {
     agent any
-    environment {
-        COMPOSE_IMAGE_TAG = "react-app:${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
-    }
+
     triggers {
-        // Trigger pipeline on pull request events
-        githubPullRequest()
+        githubPullRequests {
+            orgWhitelist('your-github-org') // Optional: Add your GitHub organization or repository name
+        }
     }
+
+    environment {
+        DOCKER_IMAGE_NAME = "my-react-app" // Local Docker image name
+        DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_ID}"
+        DOCKER_NETWORK = "react_network"
+    }
+
     stages {
-        stage('Checkout') {
+        stage('Checkout Code') {
             steps {
                 // Checkout the code from the PR branch or master
                 checkout scm
             }
         }
-        stage('Build with Docker Compose') {
+
+        stage('Build React App') {
             steps {
                 script {
-                    // Build the Docker image using docker-compose
-                    sh 'docker-compose build'
+                    // Install dependencies and build the React app
+                    sh 'npm install'
+                    sh 'npm run build'
                 }
             }
         }
-        stage('Test') {
+
+        stage('Build Docker Image') {
             steps {
-                // Run tests inside the built container
                 script {
-                    sh 'docker-compose run --rm react-app npm test'
+                    // Build Docker image locally using Dockerfile
+                    sh 'docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG .'
                 }
             }
         }
-        stage('Deploy to Staging') {
+
+        stage('Run Docker Container Locally') {
             steps {
-                // Start the service in detached mode using docker-compose
                 script {
-                    sh 'docker-compose up -d'
+                    // Run the Docker container using Docker Compose or directly
+                    sh '''
+                    docker network create $DOCKER_NETWORK || true
+                    docker run -d --name react-app -p 8080:80 --network $DOCKER_NETWORK $DOCKER_IMAGE_NAME:$DOCKER_TAG
+                    '''
                 }
-                echo "Staging server is running at http://localhost:3000"
+            }
+        }
+
+        stage('Test Docker Container (Optional)') {
+            steps {
+                script {
+                    // Optionally, you can run tests on the container here
+                    // sh 'docker exec react-app npm test'
+                }
+            }
+        }
+
+        stage('Clean up') {
+            steps {
+                script {
+                    // Stop and remove the container after testing
+                    sh 'docker stop react-app || true'
+                    sh 'docker rm react-app || true'
+                    sh 'docker rmi $DOCKER_IMAGE_NAME:$DOCKER_TAG || true'
+                    sh 'docker network rm $DOCKER_NETWORK || true'
+                }
             }
         }
     }
+
     post {
         always {
-            // Bring down the Docker Compose services
-            script {
-                sh 'docker-compose down'
-            }
-        }
-        success {
-            echo "Pull request deployment successful."
-        }
-        failure {
-            echo "Pull request deployment failed."
+            // Clean up Docker resources after each build
+            sh 'docker system prune -f || true'
         }
     }
 }
