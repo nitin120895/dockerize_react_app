@@ -1,7 +1,8 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_IMAGE_NAME = "my-react-app" // Local Docker image name
+        DOCKER_IMAGE_NAME = "my-react-app"
         DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_ID}"
         DOCKER_NETWORK = "react_network"
     }
@@ -9,16 +10,25 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                // Checkout the code from the PR branch or master
                 checkout scm
+            }
+        }
+
+        stage('Build React App') {
+            steps {
+                script {
+                    sh 'npm install'
+                    sh 'npm run build'
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Build Docker image locally using Dockerfile
+                    echo "Building Docker image..."
                     sh 'docker build -t $DOCKER_IMAGE_NAME:$DOCKER_TAG .'
+                    echo "Docker image built: $DOCKER_IMAGE_NAME:$DOCKER_TAG"
                 }
             }
         }
@@ -26,11 +36,12 @@ pipeline {
         stage('Run Docker Container Locally') {
             steps {
                 script {
-                    // Run the Docker container using Docker Compose or directly
+                    echo "Running Docker container..."
                     sh '''
                     docker network create $DOCKER_NETWORK || true
                     docker run -d --name react-app -p 8080:80 --network $DOCKER_NETWORK $DOCKER_IMAGE_NAME:$DOCKER_TAG
                     '''
+                    echo "Docker container is running."
                 }
             }
         }
@@ -38,7 +49,7 @@ pipeline {
         stage('Clean up') {
             steps {
                 script {
-                    // Stop and remove the container after testing
+                    echo "Cleaning up Docker container..."
                     sh 'docker stop react-app || true'
                     sh 'docker rm react-app || true'
                     sh 'docker rmi $DOCKER_IMAGE_NAME:$DOCKER_TAG || true'
@@ -50,7 +61,7 @@ pipeline {
 
     post {
         always {
-            // Clean up Docker resources after each build
+            echo "Cleaning up Docker resources..."
             sh 'docker system prune -f || true'
         }
     }
