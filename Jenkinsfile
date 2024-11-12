@@ -2,9 +2,8 @@ pipeline {
     agent any
 
     environment {
-        // Define Docker image name
-        IMAGE_NAME = 'my-docker-image'
-        IMAGE_TAG = 'latest'
+        IMAGE_NAME = 'my-docker-image'  // Name of the Docker image
+        IMAGE_TAG = 'latest'            // Tag for the Docker image
     }
 
     stages {
@@ -13,38 +12,25 @@ pipeline {
                 checkout scm
             }
         }
-        
+
         stage('Build') {
             steps {
                 echo 'Building the project...'
- // Check Docker version to ensure it's available
-        bat 'docker --version'
-                // Build Docker image after the build process
+                
+                // Build Docker image using Windows batch command
                 script {
-                    // Build the Docker image and fail the pipeline if it fails
-                    try {
-                        sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    bat 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
                 }
             }
         }
-        
+
         stage('Deploy') {
             steps {
                 echo 'Deploying the project...'
 
                 // Run Docker container from the built image
                 script {
-                    // Run the Docker container and fail the pipeline if it fails
-                    try {
-                        sh 'docker run -d --name my-container ${IMAGE_NAME}:${IMAGE_TAG}'
-                    } catch (Exception e) {
-                        currentBuild.result = 'FAILURE'
-                        throw e
-                    }
+                    bat 'docker run -d --name my-container ${IMAGE_NAME}:${IMAGE_TAG}'
                 }
             }
         }
@@ -53,15 +39,12 @@ pipeline {
     post {
         always {
             echo 'This will run after any stage completes.'
-            
-            // Clean up Docker containers and images if necessary
+
+            // Clean up Docker containers and images after deployment
             script {
-                // Stop and remove the container after deployment (if it was created)
-                sh 'docker stop my-container || true'
-                sh 'docker rm my-container || true'
-                
-                // Optionally remove the Docker image
-                sh 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true'
+                bat 'docker stop my-container || true'
+                bat 'docker rm my-container || true'
+                bat 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true'
             }
         }
     }
