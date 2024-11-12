@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'my-docker-image'  // Name of the Docker image
-        IMAGE_TAG = 'latest'            // Tag for the Docker image
+        IMAGE_NAME = 'my-docker-image'
+        IMAGE_TAG = 'latest'
     }
 
     stages {
@@ -16,11 +16,10 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the project...'
-                
-                // Build Docker image using Windows batch command
+
+                // Build Docker image using Windows batch variables
                 script {
-                     bat 'docker --version'
-                    bat 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+                    bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
                 }
             }
         }
@@ -29,9 +28,9 @@ pipeline {
             steps {
                 echo 'Deploying the project...'
 
-                // Run Docker container from the built image
+                // Run Docker container using Windows batch variables
                 script {
-                    bat 'docker run -d --name my-container ${IMAGE_NAME}:${IMAGE_TAG}'
+                    bat 'docker run -d --name my-container %IMAGE_NAME%:%IMAGE_TAG%'
                 }
             }
         }
@@ -40,12 +39,12 @@ pipeline {
     post {
         always {
             echo 'This will run after any stage completes.'
-
-            // Clean up Docker containers and images after deployment
+            
+            // Clean up Docker containers and images
             script {
                 bat 'docker stop my-container || true'
                 bat 'docker rm my-container || true'
-                bat 'docker rmi ${IMAGE_NAME}:${IMAGE_TAG} || true'
+                bat 'docker rmi %IMAGE_NAME%:%IMAGE_TAG% || true'
             }
         }
     }
