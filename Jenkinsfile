@@ -8,18 +8,23 @@ pipeline {
 
     stages {
         stage('Checkout') {
-           if (env.CHANGE_BRANCH) {
+          steps {
+                script {
+                    // If this is a PR, checkout the source branch of the PR (feature branch)
+                    if (env.CHANGE_BRANCH) {
                         echo "Checking out the PR source branch: ${env.CHANGE_BRANCH}"
                         checkout scm: [
                             $class: 'GitSCM',
                             branches: [[name: "origin/${env.CHANGE_BRANCH}"]],
-                            userRemoteConfigs: [[url: 'https://github.com/nitin120895/dockerize_react_app.git']]
+                            userRemoteConfigs: [[url: 'https://github.com/your-repo.git']]
                         ]
                     } else {
-                        // If not a PR (for example, directly pushing to the main branch), checkout the default branch
-                        echo "Checking out the main branch"
+                        // If not a PR (direct push), check out the branch from which the job was triggered (e.g., main)
+                        echo "Not a PR, checking out the branch from which the job was triggered (e.g., main)"
                         checkout scm
                     }
+                }
+            }
         }
 
         stage('Build') {
