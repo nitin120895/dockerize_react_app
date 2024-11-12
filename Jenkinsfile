@@ -19,6 +19,7 @@ pipeline {
 
                 // Build Docker image using Windows batch variables
                 script {
+                    bat 'docker --version'
                     bat 'docker build -t %IMAGE_NAME%:%IMAGE_TAG% .'
                 }
             }
