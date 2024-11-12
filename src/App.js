@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React gdf
+          Learn React gdf test build
         </a>
       </header>
     </div>
