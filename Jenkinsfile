@@ -18,7 +18,7 @@ pipeline {
             steps {
                 echo 'Building the project...'
  // Check Docker version to ensure it's available
-        sh 'docker --version'
+        bat 'docker --version'
                 // Build Docker image after the build process
                 script {
                     // Build the Docker image and fail the pipeline if it fails
