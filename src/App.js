@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React gdf nbn
+          Learn React gdf nbn mnbb
         </a>
       </header>
     </div>
