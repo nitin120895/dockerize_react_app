@@ -20,8 +20,13 @@ pipeline {
 
                 // Build Docker image after the build process
                 script {
-                    // Build the Docker image
-                    sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+                    // Build the Docker image and fail the pipeline if it fails
+                    try {
+                        sh 'docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -32,8 +37,13 @@ pipeline {
 
                 // Run Docker container from the built image
                 script {
-                    // Run the Docker container
-                    sh 'docker run -d --name my-container ${IMAGE_NAME}:${IMAGE_TAG}'
+                    // Run the Docker container and fail the pipeline if it fails
+                    try {
+                        sh 'docker run -d --name my-container ${IMAGE_NAME}:${IMAGE_TAG}'
+                    } catch (Exception e) {
+                        currentBuild.result = 'FAILURE'
+                        throw e
+                    }
                 }
             }
         }
@@ -45,7 +55,7 @@ pipeline {
             
             // Clean up Docker containers and images if necessary
             script {
-                // Stop and remove the container after deployment
+                // Stop and remove the container after deployment (if it was created)
                 sh 'docker stop my-container || true'
                 sh 'docker rm my-container || true'
                 
