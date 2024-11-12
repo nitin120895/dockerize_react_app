@@ -10,6 +10,7 @@ pipeline {
         stage('Checkout') {
           steps {
                 script {
+                    echo "CHANGE_BRANCH is: ${env.CHANGE_BRANCH}"
                     // If this is a PR, checkout the source branch of the PR (feature branch)
                     if (env.CHANGE_BRANCH) {
                         echo "Checking out the PR source branch: ${env.CHANGE_BRANCH}"
