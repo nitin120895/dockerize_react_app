@@ -41,12 +41,6 @@ pipeline {
         always {
             echo 'This will run after any stage completes.'
             
-            // Clean up Docker containers and images
-            script {
-                bat 'docker stop my-container || true'
-                bat 'docker rm my-container || true'
-                bat 'docker rmi %IMAGE_NAME%:%IMAGE_TAG% || true'
-            }
         }
     }
 }
