@@ -30,7 +30,7 @@ pipeline {
 
                 // Run Docker container using Windows batch variables
                 script {
-                    bat 'docker run -d --name my-container %IMAGE_NAME%:%IMAGE_TAG%'
+                    bat 'docker run -d -p 3001:80 --name my-container %IMAGE_NAME%:%IMAGE_TAG%'
                 }
             }
         }
