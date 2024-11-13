@@ -9,21 +9,13 @@ pipeline {
     stages {
         stage('Checkout') {
           steps {
+               echo "CHANGE_BRANCH"
                 script {
-                    echo "CHANGE_BRANCH is: ${env.CHANGE_BRANCH}"
-                    // If this is a PR, checkout the source branch of the PR (feature branch)
-                    if (env.CHANGE_BRANCH) {
-                        echo "Checking out the PR source branch: ${env.CHANGE_BRANCH}"
-                        checkout scm: [
-                            $class: 'GitSCM',
-                            branches: [[name: "origin/${env.CHANGE_BRANCH}"]],
-                            userRemoteConfigs: [[url: 'https://github.com/your-repo.git']]
-                        ]
-                    } else {
+                   
                         // If not a PR (direct push), check out the branch from which the job was triggered (e.g., main)
                         echo "Not a PR, checking out the branch from which the job was triggered (e.g., main)"
-                        checkout scm
-                    }
+                       checkout scmGit(branches: [[name: '*/nitin120895-patch-42']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/nitin120895/dockerize_react_app.git']])
+                    
                 }
             }
         }
