@@ -12,14 +12,11 @@ RUN npm install
 COPY . ./
 RUN npm run build
 
-# Step 2: Serve with NGINX
-FROM nginx:alpine
+# Install 'serve' globally
+RUN npm install --global serve
 
-# Copy the build files from the build stage
-COPY --from=build /app/build /usr/share/nginx/html
+# Expose the port the app will run on
+EXPOSE 3000
 
-# Expose port 80 for NGINX
-EXPOSE 80
-
-# Start NGINX server
-CMD ["nginx", "-g", "daemon off;"]
+# Start the application using 'serve'
+CMD ["serve", "-s", "build", "-l", "3000"]
