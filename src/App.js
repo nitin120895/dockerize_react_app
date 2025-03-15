@@ -15,7 +15,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React 
+          Learn React New pipelone test patch 50 updated
         </a>
       </header>
     </div>
